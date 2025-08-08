@@ -1,0 +1,10 @@
+project_id = "nwohehoountzfudzygqg"
+
+[functions.generate-job-description]
+verify_jwt = true
+
+[functions.generate-job-description-stream]
+verify_jwt = true
+
+[functions.interview-scheduler-chat]
+verify_jwt = true
