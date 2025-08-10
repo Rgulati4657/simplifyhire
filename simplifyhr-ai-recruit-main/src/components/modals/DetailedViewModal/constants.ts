@@ -49,7 +49,32 @@ export const FILTER_OPTIONS: Record<DataType, FilterOption[]> = {
     { value: 'offer', label: 'Offer' },
     { value: 'hired', label: 'Hired' },
     { value: 'rejected', label: 'Rejected' }
-  ]
+  ],
+  'my-applications': [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'applied', label: 'Applied' },
+    { value: 'screening', label: 'Screening' },
+    { value: 'interviewing', label: 'Interviewing' },
+    { value: 'testing', label: 'Testing' },
+    { value: 'offer', label: 'Offer' },
+    { value: 'hired', label: 'Hired' },
+    { value: 'rejected', label: 'Rejected' },
+  ],
+  'in-review': [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'screening', label: 'Screening' },
+    { value: 'interviewing', label: 'Interviewing' },
+    { value: 'testing', label: 'Testing' },
+  ],
+  
+  // You can also define a separate list for interviews
+  'my-interviews': [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'missed', label: 'Missed' },
+  ],
+  
 };
 
 export const STATUS_COLORS: Record<string, string> = {

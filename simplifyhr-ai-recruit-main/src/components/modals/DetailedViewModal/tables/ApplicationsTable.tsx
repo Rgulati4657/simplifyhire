@@ -6,14 +6,16 @@ import { TableBaseProps } from '../types';
 import { formatDate, getStatusColor, getAIScoreVariant } from '../utils';
 import { profile } from 'console';
 
-interface ApplicationsTableProps extends TableBaseProps {}
+interface ApplicationsTableProps extends TableBaseProps {
+  hideCandidateColumn?: boolean;
+}
 
-export const ApplicationsTable = ({ data, onEdit }: ApplicationsTableProps) => {
+export const ApplicationsTable = ({ data, onEdit, hideCandidateColumn }: ApplicationsTableProps) => {
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Candidate</TableHead>
+          {!hideCandidateColumn && <TableHead>Candidate</TableHead>}
           <TableHead>Job</TableHead>
           <TableHead>Company</TableHead>
           <TableHead>AI Score</TableHead>
@@ -25,10 +27,12 @@ export const ApplicationsTable = ({ data, onEdit }: ApplicationsTableProps) => {
       <TableBody>
         {data.map((application) => (
           <TableRow key={application.id}>
-            <TableCell className="font-medium">
-              {application.candidates?.profiles?.first_name} {application.candidates?.profiles?.last_name}
-              <div className="text-xs text-muted-foreground">{application.candidates?.profiles?.email}</div>
-            </TableCell>
+            {!hideCandidateColumn && (
+              <TableCell className="font-medium">
+                {application.candidates?.profiles?.first_name} {application.candidates?.profiles?.last_name}
+                <div className="text-xs text-muted-foreground">{application.candidates?.profiles?.email}</div>
+              </TableCell>
+            )}
             <TableCell>{application.jobs?.title}</TableCell>
             <TableCell>{application.jobs?.companies?.name}</TableCell>
             <TableCell>

@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DataType } from '../types';
 import { getSearchFields, applyStatusFilter } from '../utils';
 
-export const useDetailedViewData = (type: DataType, open: boolean) => {
+export const useDetailedViewData = (type: DataType, open: boolean, initialData?: any[]) => {
   const [data, setData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,17 +94,39 @@ export const useDetailedViewData = (type: DataType, open: boolean) => {
           .eq('status', 'hired')
           .gte('updated_at', monthAgo.toISOString())
           .order('updated_at', { ascending: false });
-          
+       case 'my-applications':
+        return supabase
+          .from('job_applications')
+          .select('id, applied_at, status, jobs!inner(title, companies(name))')
+          .order('applied_at', { ascending: false });
+
+      case 'in-review':
+        return supabase
+          .from('job_applications')
+          .select('id, applied_at, status, jobs!inner(title, companies(name))')
+          .in('status', ['screening', 'interviewing', 'testing']) // Your "in review" statuses
+          .order('applied_at', { ascending: false });
+
+      case 'my-interviews':
+        return supabase
+          .from('interview_schedules')
+          .select('id, scheduled_at, status, interview_type, job_applications!inner(jobs!inner(title, companies(name)))')
+          .order('scheduled_at', { ascending: true });
+              
       default:
         return null;
     }
   }, [type]);
 
   const fetchData = useCallback(async () => {
+     if (initialData) return;
     setLoading(true);
     try {
       const query = buildQuery();
-      if (!query) return;
+      if (!query){
+        setData([]);
+        return;
+      };
 
       const { data: result, error } = await query;
       
@@ -119,7 +141,7 @@ export const useDetailedViewData = (type: DataType, open: boolean) => {
     } finally {
       setLoading(false);
     }
-  }, [buildQuery, toast]);
+  }, [buildQuery, toast, initialData]);
 
   const filterData = useCallback(() => {
     let filtered = data;
@@ -141,9 +163,15 @@ export const useDetailedViewData = (type: DataType, open: boolean) => {
   }, [data, searchTerm, filterValue, type]);
 
   useEffect(() => {
-    if (open) {
-      fetchData();
-    }
+     if (initialData) {
+        console.log("Modal is using pre-fetched initialData:", initialData);
+        setData(initialData);
+        setLoading(false); // Make sure to turn off loading
+      } else {
+        // Otherwise, if no data was passed, perform a fetch as normal.
+        console.log("Modal has no initialData, fetching from database...");
+        fetchData();
+      }
   }, [open, fetchData]);
 
   useEffect(() => {

@@ -15,6 +15,14 @@ export const getSearchFields = (item: any, type: DataType): string[] => {
     case 'applications':
     case 'monthlyHires':
       return [item.candidates?.first_name, item.candidates?.last_name, item.jobs?.title];
+    case 'my-applications':
+    case 'in-review':
+      // Define what parts of an application are searchable for a candidate
+      return [
+        item.jobs?.title,
+        item.jobs?.companies?.name,
+        item.status
+      ];
     default:
       return [];
   }
@@ -37,6 +45,10 @@ export const applyStatusFilter = (item: any, type: DataType, filterValue: string
     case 'activeJobs':
     case 'applications':
     case 'monthlyHires':
+      return item.status === filterValue;
+     case 'my-applications':
+    case 'in-review':
+      // The filter dropdown should work on the application's status
       return item.status === filterValue;
     default:
       return true;

@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DetailedViewModal from '@/components/modals/DetailedViewModal';
 import { 
   Search, 
   Briefcase, 
@@ -29,6 +30,15 @@ const CandidateDashboard = () => {
   const navigate = useNavigate();
 // const [viewingAppId, setViewingAppId] = useState<string | null>(null);
 
+ const [detailModal, setDetailModal] = useState<{
+    type: 'my-applications' | 'in-review' | 'my-interviews';
+    open: boolean;
+    title: string;
+  }>({
+    type: 'my-applications',
+    open: false,
+    title: ''
+  });
 
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -45,6 +55,13 @@ const CandidateDashboard = () => {
       fetchCandidateData();
     }
   }, [profile]);
+
+// TO THIS (Functional update form)
+const openDetailModal = (type: 'my-applications' | 'in-review' | 'my-interviews', title: string) => {
+  console.log("Requesting modal state update to:", { type, open: true, title });
+  // setDetailModal(prevState => ({ ...prevState, type, open: true, title }));
+   setDetailModal({ type, open: true, title });
+};
 
   // const fetchCandidateData = async () => {
   //   try {
@@ -422,6 +439,7 @@ const fetchCandidateData = async () => {
   };
 
   return (
+    <>
     <DashboardLayout title="Candidate Dashboard" actions={dashboardActions}>
       <div className="space-y-8 animate-fade-in">
         {/* Hero Section */}
@@ -435,7 +453,11 @@ const fetchCandidateData = async () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="stat-card group animate-slide-up">
+          <div className="stat-card group animate-slide-up"  onClick={() => {
+    // --- THIS IS THE TEST ---
+    console.log("Applications card CLICKED!"); 
+    openDetailModal('my-applications', 'My Submitted Applications');
+  }} >
             <div className="flex items-center justify-between p-6">
               <div className="flex-1">
                 <div className="text-sm font-medium text-muted-foreground mb-2">
@@ -455,7 +477,7 @@ const fetchCandidateData = async () => {
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-primary opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
           </div>
 
-          <div className="stat-card group animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <div className="stat-card group animate-slide-up" style={{ animationDelay: '100ms' }} onClick={() => openDetailModal('in-review', 'Applications In Review')}  >
             <div className="flex items-center justify-between p-6">
               <div className="flex-1">
                 <div className="text-sm font-medium text-muted-foreground mb-2">
@@ -475,7 +497,7 @@ const fetchCandidateData = async () => {
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-primary opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
           </div>
 
-          <div className="stat-card group animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="stat-card group animate-slide-up" style={{ animationDelay: '200ms' }} onClick={() => openDetailModal('my-interviews', 'My Scheduled Interviews')} >
             <div className="flex items-center justify-between p-6">
               <div className="flex-1">
                 <div className="text-sm font-medium text-muted-foreground mb-2">
@@ -755,6 +777,29 @@ const fetchCandidateData = async () => {
         </div>
       </div>
     </DashboardLayout>
+     {/* --- THIS IS THE CRUCIAL PART THAT WAS MISSING --- */}
+      {/* It renders the modal, which listens for the 'open' state to change. */}
+      <DetailedViewModal
+        type={detailModal.type}
+        open={detailModal.open}
+        onOpenChange={(open) => setDetailModal(prevState => ({ ...prevState, open }))}
+        title={detailModal.title}
+
+        initialData={
+    // If the modal is for 'my-applications', give it the full 'applications' array
+    detailModal.type === 'my-applications' 
+      ? applications 
+    
+    // If the modal is for 'in-review', give it a pre-filtered version of the 'applications' array
+    : detailModal.type === 'in-review' 
+      ? applications.filter(app => ['applied','screening', 'interviewing', 'testing'].includes(app.status))
+    
+    // For 'my-interviews', we don't have the data yet, so we pass nothing.
+    // The modal will then perform its own fetch for this case.
+    : undefined 
+  }
+      />
+    </>
   );
 };
 

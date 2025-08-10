@@ -13,7 +13,20 @@ import EditCompanyModal from '@/components/forms/EditCompanyModal';
 import EditUserModal from '@/components/forms/EditUserModal';
 import EditVendorModal from '@/components/forms/EditVendorModal';
 
-const DetailedViewModal = ({ type, open, onOpenChange, title }: DetailedViewModalProps) => {
+
+// --- 1. Update the Props Type ---
+export interface DetailedViewModalProps {
+  type: DataType;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  initialData?: any[]; // <-- ADD/VERIFY THIS LINE
+}
+
+const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: DetailedViewModalProps) => {
+   // --- THIS IS THE TEST ---
+  console.log("DetailedViewModal is rendering with props:", { type, open });
+
   const {
     data,
     filteredData,
@@ -23,7 +36,7 @@ const DetailedViewModal = ({ type, open, onOpenChange, title }: DetailedViewModa
     setSearchTerm,
     setFilterValue,
     refetchData
-  } = useDetailedViewData(type, open);
+  } = useDetailedViewData(type, open,initialData);
 
   // Edit modal states
   const [editUser, setEditUser] = useState<EditModalState>({ open: false, id: null });
