@@ -191,13 +191,17 @@ const Jobs = () => {
 
     // --- STEP 2: Check for Existing Application ---
     console.log("Step 2: Checking for existing application...");
-    const { data: existingApplication, error: checkError } = await supabase
-      .from('job_applications')
-      .select('id')
-      .eq('job_id', jobId)
-      .eq('candidate_id', candidateId)
-      .maybeSingle(); // Use maybeSingle() to handle no result gracefully
+    // const { data: existingApplication, error: checkError } = await supabase
+    //   .from('job_applications')
+    //   .select('id')
+    //   .eq('job_id', jobId)
+    //   .eq('candidate_id', candidateId)
+    //   .maybeSingle(); // Use maybeSingle() to handle no result gracefully
 
+          const { data: existingApplication, error: checkError } = await supabase.rpc('check_if_already_applied', {
+          p_job_id: jobId
+        });
+        
     if (checkError) {
       console.error("ERROR in Step 2 (Checking Application):", checkError);
       throw new Error("Could not check for existing applications.");

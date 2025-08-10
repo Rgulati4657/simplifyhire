@@ -261,13 +261,16 @@ const handleApply = async (jobId: string) => {
 
     // 3. Prevent Duplicate Applications.
     // This is a simple check to improve user experience.
-    const { data: existingApplication, error: checkError } = await supabase
-      .from('job_applications')
-      .select('id')
-      .eq('job_id', jobId)
-      .eq('candidate_id', candidateId)
-      .maybeSingle(); 
-
+    // const { data: existingApplication, error: checkError } = await supabase
+    //   .from('job_applications')
+    //   .select('id')
+    //   .eq('job_id', jobId)
+    //   .eq('candidate_id', candidateId)
+    //   .maybeSingle(); 
+        const { data: existingApplication, error: checkError } = await supabase.rpc('check_if_already_applied', {
+      p_job_id: jobId
+    });
+    
     if (checkError) throw checkError; // If this check fails, something is wrong.
 
     if (existingApplication) {
@@ -308,6 +311,108 @@ const handleApply = async (jobId: string) => {
     setApplying(false);
   }
 };
+
+// This is the final diagnostic version for BOTH Jobs.tsx and JobDetail.tsx
+
+// const handleApply = async (jobId: string) => {
+//   // 1. Guard Clause: Ensure a user is logged in.
+//   if (!profile?.id) {
+//     toast({
+//       title: "Authentication Required",
+//       description: "Please log in to apply for jobs.",
+//       variant: "warning",
+//     });
+//     return;
+//   }
+
+//   setApplying(true);
+//   console.log(`--- APPLYING FOR JOB: ${jobId} ---`);
+//   console.log(`User Profile ID: ${profile.id}`);
+
+//   try {
+//     // 2. Fetch the Candidate's ID from the `candidates` table.
+//     console.log("Step 1: Fetching candidate ID from 'candidates' table...");
+//     const { data: candidateData, error: candidateError } = await supabase
+//       .from('candidates')
+//       .select('id')
+//       .eq('profile_id', profile.id)
+//       .single();
+
+//     if (candidateError) {
+//       console.error(">>> FAILURE at Step 1: Error fetching candidate record.", candidateError);
+//       throw candidateError;
+//     }
+//     if (!candidateData) {
+//       console.error(">>> FAILURE at Step 1: No candidate record found for this profile.");
+//       throw new Error("Your candidate record could not be found. Please complete your profile first.");
+//     }
+//     const candidateId = candidateData.id;
+//     console.log("Step 1 SUCCESS. Found Candidate ID:", candidateId);
+
+
+//     // 3. Prevent Duplicate Applications.
+//     console.log(`Step 2: Checking if application exists for job ${jobId} and candidate ${candidateId}...`);
+//     const { data: existingApplication, error: checkError, status: checkStatus } = await supabase
+//       .from('job_applications')
+//       .select('id')
+//       .eq('job_id', jobId)
+//       .eq('candidate_id', candidateId)
+//       .maybeSingle(); 
+
+//     console.log("Step 2 Response Status:", checkStatus);
+//     if (checkError) {
+//         console.error(">>> FAILURE at Step 2: Error during duplicate check.", checkError);
+//         throw checkError;
+//     }
+//     console.log("Step 2 Data Received:", existingApplication);
+
+
+//     if (existingApplication) {
+//       console.log("Step 2 CONCLUSION: Duplicate application found. Halting process.");
+//       toast({ title: "Already Applied", description: "You have already applied for this job." });
+//       setApplying(false); // Make sure to stop loading
+//       return; // Stop the function here.
+//     }
+//     console.log("Step 2 CONCLUSION: No duplicate found. Proceeding to insert.");
+
+
+//     // 4. Insert the New Application.
+//     console.log("Step 3: Inserting new application...");
+//     const { error: insertError, status: insertStatus } = await supabase
+//       .from('job_applications')
+//       .insert({
+//         job_id: jobId,
+//         candidate_id: candidateId,
+//         status: 'applied'
+//       });
+    
+//     console.log("Step 3 Response Status:", insertStatus);
+//     if (insertError) {
+//         console.error(">>> FAILURE at Step 3: Error during insert.", insertError);
+//         throw insertError;
+//     }
+
+
+//     // 5. Success!
+//     console.log("--- APPLICATION PROCESS SUCCESSFUL ---");
+//     toast({
+//       title: "Application Submitted!",
+//       description: "Your application has been sent successfully.",
+//     });
+
+//   } catch (error: any) {
+//     // This single catch block handles any error from the steps above.
+//     console.error('--- CATCH BLOCK: An error occurred during the application process ---', error);
+//     toast({
+//         title: "Application Failed",
+//         description: error.message || "An unexpected error occurred. Please try again.",
+//         variant: "destructive",
+//     });
+//   } finally {
+//     // Ensure the loading state is always turned off, even if there's an error.
+//     setApplying(false);
+//   }
+// };
 
   const formatSalary = (min: number | null, max: number | null, currency: string) => {
     if (!min && !max) return 'Salary not specified';

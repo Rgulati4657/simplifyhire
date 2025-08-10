@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+// import { ApplicationDetailModal } from '@/components/modals/ApplicationDetailModal';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,9 @@ const CandidateDashboard = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+// const [viewingAppId, setViewingAppId] = useState<string | null>(null);
+
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     applications: 0,
@@ -37,67 +41,318 @@ const CandidateDashboard = () => {
   const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
 
   useEffect(() => {
-    if (profile?.user_id) {
+    if (profile?.id) {
       fetchCandidateData();
     }
   }, [profile]);
 
-  const fetchCandidateData = async () => {
-    try {
-      console.log('Fetching candidate data for user:', profile?.user_id);
+  // const fetchCandidateData = async () => {
+  //   try {
+  //     console.log('Fetching candidate data for user:', profile?.id);
       
-      // First get the candidate record for this user
-      const { data: candidateData, error: candidateError } = await supabase
-        .from('candidates')
-        .select('id')
-        .eq('user_id', profile?.user_id)
-        .single();
+  //     // First get the candidate record for this user
+  //     const { data: candidateData, error: candidateError } = await supabase
+  //       .from('candidates')
+  //       .select('id')
+  //       .eq('user_id', profile?.id)
+  //       .single();
 
-      if (candidateError || !candidateData) {
-        console.error('No candidate profile found:', candidateError);
+  //     if (candidateError || !candidateData) {
+  //       console.error('No candidate profile found:', candidateError);
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     // Get candidate's applications using the candidate ID
+  //     const { data: applicationsData, error: appsError } = await supabase
+  //       .from('job_applications')
+  //       .select(`
+  //         *,
+  //         jobs (
+  //           id,
+  //           title,
+  //           location,
+  //           salary_min,
+  //           salary_max,
+  //           currency,
+  //           companies (name)
+  //         )
+  //       `)
+  //       .eq('candidate_id', candidateData.id)
+  //       .order('applied_at', { ascending: false });
+
+  //     if (appsError) {
+  //       console.error('Error fetching applications:', appsError);
+  //     } else {
+  //       setApplications(applicationsData || []);
+        
+  //       // Calculate stats
+  //       const totalApps = applicationsData?.length || 0;
+  //       const inReview = applicationsData?.filter(app => app.status === 'screening' || app.status === 'reviewing').length || 0;
+  //       const interviews = applicationsData?.filter(app => app.status === 'interview').length || 0;
+        
+  //       setStats({
+  //         applications: totalApps,
+  //         inReview,
+  //         interviews,
+  //         profileViews: 24 // Mock for now
+  //       });
+  //     }
+
+  //     // Get AI-powered job recommendations
+  //     const { data: recommendedJobs, error: recommendError } = await supabase.functions.invoke('recommend-jobs', {
+  //       body: { userId: profile.id }
+  //     });
+
+  //     if (recommendError) {
+  //       console.error('Error fetching AI recommendations:', recommendError);
+  //       // Fallback to regular job fetching
+  //       const { data: fallbackJobs, error: fallbackError } = await supabase
+  //         .from('jobs')
+  //         .select(`
+  //           *,
+  //           companies (name, logo_url)
+  //         `)
+  //         .eq('status', 'published')
+  //         .order('created_at', { ascending: false })
+  //         .limit(6);
+
+  //       if (!fallbackError) {
+  //         setRecommendedJobs(fallbackJobs || []);
+  //       }
+  //     } else {
+  //       setRecommendedJobs(recommendedJobs || []);
+  //     }
+
+  //   } catch (error) {
+  //     console.error('Error fetching candidate data:', error);
+  //     toast({
+  //       title: "Failed to load dashboard data",
+  //       description: "Could not fetch your applications and job recommendations.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  //   const fetchCandidateData = async () => {
+
+  //      if (!profile?.id) {
+  //       setLoading(false);
+  //       return;
+  //   }
+  //    setLoading(true);
+  //   try {
+  //     console.log('Fetching candidate data for user:', profile.id);
+      
+  //     // First get the candidate record for this user
+  //     const { data: candidateData, error: candidateError } = await supabase
+  //       .from('candidates')
+  //       .select('id')
+  //       .eq('profile_id', profile.id)
+  //       .single();
+
+  //     if (candidateError || !candidateData) {
+  //       console.error('No candidate profile found:', candidateError);
+  //       setLoading(false);
+  //       return;
+  //     }
+  //     const candidateId = candidateData.id;
+  //     // Get candidate's applications using the candidate ID
+  //     const { data: applicationsData, error: appsError } = await supabase
+  //       .from('job_applications')
+  //       .select(`
+  //         *,
+  //         jobs (
+  //           id,
+  //           title,
+  //           location,
+  //           salary_min,
+  //           salary_max,
+  //           currency,
+  //           companies (name)
+  //         )
+  //       `)
+  //       .eq('candidate_id', candidateId)
+  //       .order('applied_at', { ascending: false });
+
+  //     if (appsError) {
+  //       console.error('Error fetching applications:', appsError);
+  //     } else {
+  //       setApplications(applicationsData || []);
+        
+  //       // Calculate stats
+  //       const totalApps = applicationsData?.length || 0;
+  //      const inReview = applicationsData?.filter(app => ['applied', 'screening', 'reviewing'].includes(app.status)).length || 0;
+  //           const interviews = applicationsData?.filter(app => app.status === 'interview').length || 0;
+            
+  //       setStats({
+  //         applications: totalApps,
+  //         inReview,
+  //         interviews,
+  //         profileViews: 24 // Mock for now
+  //       });
+  //     }
+
+  //     // Get AI-powered job recommendations
+  //     const { data: recommendedJobs, error: recommendError } = await supabase.functions.invoke('recommend-jobs', {
+  //       body: { userId: profile.id }
+  //     });
+
+  //     if (recommendError) {
+  //       console.error('Error fetching AI recommendations:', recommendError);
+  //       // Fallback to regular job fetching
+  //       const { data: fallbackJobs, error: fallbackError } = await supabase
+  //         .from('jobs')
+  //         .select(`
+  //           *,
+  //           companies (name, logo_url)
+  //         `)
+  //         .eq('status', 'published')
+  //         .order('created_at', { ascending: false })
+  //         .limit(6);
+
+  //       if (!fallbackError) {
+  //         setRecommendedJobs(fallbackJobs || []);
+  //       }
+  //     } else {
+  //       setRecommendedJobs(recommendedJobs || []);
+  //     }
+
+  //   } catch (error) {
+  //     console.error('Error fetching candidate data:', error);
+  //     toast({
+  //       title: "Failed to load dashboard data",
+  //       description: "Could not fetch your applications and job recommendations.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // In CandidateDashboard.tsx
+// diagnostic function to fetch candidate data
+// const fetchCandidateData = async () => {
+//     if (!profile?.id) {
+//         setLoading(false);
+//         console.log("--- ABORTING FETCH: Profile not yet loaded. ---");
+//         return;
+//     }
+//     setLoading(true);
+//     console.log(`--- STARTING DASHBOARD FETCH for Candidate Profile ID: ${profile.id} ---`);
+
+//     try {
+//         // --- STEP 1: Fetch the candidate's own internal ID ---
+//         console.log("Step 1: Fetching ID from 'candidates' table...");
+//         const { data: candidateData, error: candidateError, status: candidateStatus } = await supabase
+//             .from('candidates')
+//             .select('id')
+//             .eq('profile_id', profile.id)
+//             .single();
+
+//         console.log("Step 1 Response Status:", candidateStatus);
+//         if (candidateError || !candidateData) {
+//             console.error(">>> FAILURE at Step 1: Could not find candidate record.", candidateError);
+//             throw new Error("Your candidate record could not be found. This might be an RLS issue on the 'candidates' table.");
+//         }
+//         const candidateId = candidateData.id;
+//         console.log("Step 1 SUCCESS. Found Candidate ID:", candidateId);
+
+//         // --- STEP 2: Fetch the candidate's applications using their ID ---
+//         console.log(`Step 2: Fetching applications from 'job_applications' where candidate_id = ${candidateId}...`);
+//         const { data: applicationsData, error: appsError, status: appsStatus } = await supabase
+//             .from('job_applications')
+//             .select(`
+//                 *,
+//                 jobs (
+//                     id, title, location,
+//                     companies (name)
+//                 )
+//             `)
+//             .eq('candidate_id', candidateId)
+//             .order('applied_at', { ascending: false });
+
+//         console.log("Step 2 Response Status:", appsStatus);
+//         if (appsError) {
+//             console.error(">>> FAILURE at Step 2: Error fetching applications.", appsError);
+//             throw appsError;
+//         }
+//         console.log("Step 2 SUCCESS. Raw application data received:", applicationsData);
+
+//         // --- STEP 3: Process the data ---
+//         if (applicationsData) {
+//             setApplications(applicationsData);
+//             const totalApps = applicationsData.length;
+//             const inReview = applicationsData.filter(app => ['applied', 'screening', 'reviewing'].includes(app.status)).length;
+//             const interviews = applicationsData.filter(app => app.status === 'interview').length;
+            
+//             console.log(`Step 3 SUCCESS. Calculated Stats: Total=${totalApps}, In Review=${inReview}, Interviews=${interviews}`);
+//             setStats({
+//                 applications: totalApps,
+//                 inReview,
+//                 interviews,
+//                 profileViews: 24 // Mock
+//             });
+//         }
+
+//     } catch (error: any) {
+//         console.error("--- CATCH BLOCK: Fetch process failed. ---", error);
+//         toast({
+//             title: "Failed to load dashboard data",
+//             description: error.message,
+//             variant: "destructive",
+//         });
+//     } finally {
+//         setLoading(false);
+//     }
+// };
+
+
+// In CandidateDashboard.tsx
+
+const fetchCandidateData = async () => {
+    if (!profile?.id) {
         setLoading(false);
         return;
-      }
+    }
+    setLoading(true);
+    try {
+        console.log(`Fetching candidate applications for user ${profile.id} via RPC...`);
 
-      // Get candidate's applications using the candidate ID
-      const { data: applicationsData, error: appsError } = await supabase
-        .from('job_applications')
-        .select(`
-          *,
-          jobs (
-            id,
-            title,
-            location,
-            salary_min,
-            salary_max,
-            currency,
-            companies (name)
-          )
-        `)
-        .eq('candidate_id', candidateData.id)
-        .order('applied_at', { ascending: false });
+        // --- THIS IS THE FINAL FIX ---
+        // We now call our single, powerful RPC function.
+        const { data: applicationsData, error } = await supabase.rpc('get_my_applications');
 
-      if (appsError) {
-        console.error('Error fetching applications:', appsError);
-      } else {
-        setApplications(applicationsData || []);
-        
-        // Calculate stats
-        const totalApps = applicationsData?.length || 0;
-        const inReview = applicationsData?.filter(app => app.status === 'screening' || app.status === 'reviewing').length || 0;
-        const interviews = applicationsData?.filter(app => app.status === 'interview').length || 0;
-        
-        setStats({
-          applications: totalApps,
-          inReview,
-          interviews,
-          profileViews: 24 // Mock for now
-        });
-      }
+        if (error) {
+            console.error("Error calling RPC get_my_applications:", error);
+            throw error;
+        }
 
-      // Get AI-powered job recommendations
+        console.log('Successfully fetched application data via RPC:', applicationsData);
+
+        if (applicationsData) {
+            setApplications(applicationsData);
+            
+            // Your stats calculation will now work perfectly with the RPC data.
+            const totalApps = applicationsData.length;
+            const inReview = applicationsData.filter(app => ['applied', 'screening', 'reviewing'].includes(app.status)).length;
+            const interviews = applicationsData.filter(app => app.status === 'interview').length;
+            
+            setStats({
+                applications: totalApps,
+                inReview,
+                interviews,
+                profileViews: 24 // Mock
+            });
+        }
+
+        // ... (your AI recommendation logic can remain the same)
+     // Get AI-powered job recommendations
       const { data: recommendedJobs, error: recommendError } = await supabase.functions.invoke('recommend-jobs', {
-        body: { userId: profile.user_id }
+        body: { userId: profile.id }
       });
 
       if (recommendError) {
@@ -120,17 +375,17 @@ const CandidateDashboard = () => {
         setRecommendedJobs(recommendedJobs || []);
       }
 
-    } catch (error) {
-      console.error('Error fetching candidate data:', error);
-      toast({
-        title: "Failed to load dashboard data",
-        description: "Could not fetch your applications and job recommendations.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+        console.error('Error fetching dashboard data:', error);
+        toast({
+            title: "Failed to load your applications",
+            description: error.message,
+            variant: "destructive",
+        });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   const dashboardActions = (
     <div className="flex items-center space-x-2">
