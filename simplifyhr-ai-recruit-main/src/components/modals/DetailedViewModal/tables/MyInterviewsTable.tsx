@@ -1,25 +1,40 @@
+// In MyInterviewsTable.tsx
+
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableBaseProps } from '../types';
 
-export const MyInterviewsTable = ({ data }: TableBaseProps) => (
-  <table className="min-w-full divide-y divide-border">
-    <thead className="bg-muted/50">
-      <tr>
-        <th className="table-header">Job Title</th>
-        <th className="table-header">Company</th>
-        <th className="table-header">Status</th>
-        <th className="table-header">Scheduled For</th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-border">
-      {data.map((interview: any) => (
-        <tr key={interview.id}>
-          <td className="table-cell">{interview.job_applications.jobs.title}</td>
-          <td className="table-cell">{interview.job_applications.jobs.companies.name}</td>
-          <td className="table-cell"><Badge>{interview.status}</Badge></td>
-          <td className="table-cell">{new Date(interview.scheduled_at).toLocaleString()}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
+export const MyInterviewsTable = ({ data }: TableBaseProps) => {
+  // --- THIS IS THE FIX ---
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <p className="text-muted-foreground">No interviews found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Job Title</TableHead>
+          <TableHead>Company</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Scheduled For</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((interview: any) => (
+          <TableRow key={interview.id}>
+            {/* The optional chaining makes this crash-proof */}
+            <TableCell>{interview.job_applications?.jobs?.title}</TableCell>
+            <TableCell>{interview.job_applications?.jobs?.companies?.name}</TableCell>
+            <TableCell><Badge>{interview.status}</Badge></TableCell>
+            <TableCell>{new Date(interview.scheduled_at).toLocaleString()}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
