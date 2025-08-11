@@ -76,7 +76,11 @@ export const useDetailedViewData = (
         return supabase
           .from('job_applications')
           .select(`
-      *,
+      id,
+      status,
+      screening_score,
+      ai_screening_notes,
+      applied_at,
       jobs!inner(title, companies!inner(name)),
       candidates!inner(
         profiles!inner(

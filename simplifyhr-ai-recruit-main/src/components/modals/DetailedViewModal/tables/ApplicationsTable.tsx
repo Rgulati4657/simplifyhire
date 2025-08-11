@@ -36,11 +36,11 @@ export const ApplicationsTable = ({ data, onEdit, hideCandidateColumn }: Applica
             <TableCell>{application.jobs?.title}</TableCell>
             <TableCell>{application.jobs?.companies?.name}</TableCell>
             <TableCell>
-              {application.ai_screening_score ? (
+              {application.screening_score ? (
                 <Badge 
-                  className={getAIScoreVariant(application.ai_screening_score)}
+                  className={getAIScoreVariant(application.screening_score)}
                 >
-                  {Math.round(application.ai_screening_score)}/100
+                  {Math.round(application.screening_score)}/100
                 </Badge>
               ) : (
                 <span className="text-muted-foreground text-sm">Not assessed</span>
