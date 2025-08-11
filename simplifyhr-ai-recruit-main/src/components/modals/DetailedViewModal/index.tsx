@@ -20,12 +20,14 @@ export interface DetailedViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  onViewJob?: (id: string) => void; // <-- Add this new optional prop
   initialData?: any[]; // <-- ADD/VERIFY THIS LINE
 }
 
-const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: DetailedViewModalProps) => {
+const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData,onViewJob}: DetailedViewModalProps) => {
    // --- THIS IS THE TEST ---
-  console.log("DetailedViewModal is rendering with props:", { type, open });
+  // console.log("DetailedViewModal is rendering with props:", { type, open });
+  console.log(`[DetailedViewModal] Rendering. The onViewJob function is:`, onViewJob);
 
   const {
     data,
@@ -98,6 +100,7 @@ const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: Deta
                 type={type} 
                 data={filteredData} 
                 onEdit={handleEdit}
+                onView={onViewJob} // Pass the onViewJob prop to TableRenderer
               />
             </LoadingState>
           </div>
