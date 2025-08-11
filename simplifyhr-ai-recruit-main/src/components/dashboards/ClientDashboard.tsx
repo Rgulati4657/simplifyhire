@@ -60,10 +60,12 @@ const [applications, setApplications] = useState([]);
     type: 'users' | 'companies' | 'jobs' | 'applications' | 'activeJobs' | 'monthlyHires';
     open: boolean;
     title: string;
+    customFilterOptions?: { value: string; label: string }[];
   }>({
     type: 'jobs',
     open: false,
-    title: ''
+    title: '',
+    customFilterOptions: undefined
   });
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -115,7 +117,9 @@ const fetchDashboardData = async () => {
       const activeJobs = jobsData.filter(job => job.status === 'published').length;
       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
       const shortlistedCandidates = jobsData.reduce((acc, job) =>
-          acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
+          acc + (job.job_applications?.filter((app: any) => 
+            ['screening', 'interview'].includes(app.status)
+          ).length || 0), 0
       );
       const selectedCandidates = jobsData.reduce((acc, job) =>
           acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
@@ -171,7 +175,32 @@ const fetchDashboardData = async () => {
   };
 
   const openDetailModal = (type: 'users' | 'companies' | 'jobs' | 'applications' | 'activeJobs' | 'monthlyHires', title: string) => {
-    setDetailModal({ type, open: true, title });
+    if (title === 'Shortlisted Candidates') {
+      setDetailModal({
+        type,
+        open: true,
+        title,
+        customFilterOptions: [
+          { value: 'interview', label: 'Interview' },
+          { value: 'screening', label: 'Screening' }
+        ],
+        defaultFilter: 'interview'
+      });
+    } else if (title === 'Total Applications') {
+      setDetailModal({
+        type,
+        open: true,
+        title,
+        customFilterOptions: null,
+        defaultFilter: 'all'
+      });
+    } else {
+      setDetailModal({
+        type,
+        open: true,
+        title
+      });
+    }
   };
 
   const handleGlobalFilter = (value: string) => {
@@ -297,6 +326,7 @@ const fetchDashboardData = async () => {
     </div>
   );
 
+  // Return loading state if data is being fetched
   if (loading) {
     return (
       <DashboardLayout title="Client Dashboard">
@@ -318,6 +348,7 @@ const fetchDashboardData = async () => {
     );
   }
 
+  // Return main dashboard content
   return (
     <DashboardLayout title="Client Dashboard" actions={dashboardActions}>
       <div className="space-y-8 animate-fade-in">
@@ -679,7 +710,9 @@ const fetchDashboardData = async () => {
           open={detailModal.open}
           onOpenChange={(open) => setDetailModal({ ...detailModal, open })}
           title={detailModal.title}
-          data={recentJobs}
+          customFilterOptions={detailModal.customFilterOptions}
+          defaultFilter={detailModal.defaultFilter}
+          // initialData={recentJobs}
           onViewJob={(id) => {
             console.log(`[ClientDashboard] onViewJob called with ID: ${id}. Setting state...`);
             setViewingJobId(id);

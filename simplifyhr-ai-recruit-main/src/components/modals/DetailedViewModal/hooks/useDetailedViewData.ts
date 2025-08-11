@@ -4,12 +4,26 @@ import { useToast } from '@/hooks/use-toast';
 import { DataType } from '../types';
 import { getSearchFields, applyStatusFilter } from '../utils';
 
-export const useDetailedViewData = (type: DataType, open: boolean, initialData?: any[]) => {
+export const useDetailedViewData = (
+  type: DataType, 
+  open: boolean, 
+  initialData?: any[],
+  defaultFilter?: string
+) => {
   const [data, setData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterValue, setFilterValue] = useState('all');
+
+  // Reset filter value when modal opens or defaultFilter changes
+  useEffect(() => {
+    if (open) {
+      // Always reset to the provided default when modal opens
+      setFilterValue(defaultFilter || 'all');
+      setSearchTerm(''); // Also reset search term for clean state
+    }
+  }, [open, defaultFilter]);
   const { toast } = useToast();
 
   const buildQuery = useCallback(() => {
@@ -55,7 +69,7 @@ export const useDetailedViewData = (type: DataType, open: boolean, initialData?:
             profiles!jobs_created_by_fkey (first_name, last_name),
             job_applications (id, status)
           `)
-          .eq('status', 'published')
+          // .eq('status', 'published')
           .order('created_at', { ascending: false });
           
       case 'applications':
