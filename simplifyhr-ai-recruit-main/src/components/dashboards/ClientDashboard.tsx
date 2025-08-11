@@ -61,6 +61,7 @@ const [applications, setApplications] = useState([]);
     open: boolean;
     title: string;
     customFilterOptions?: { value: string; label: string }[];
+    customFilterOptions?: { value: string; label: string }[];
   }>({
     type: 'jobs',
     open: false,
@@ -234,7 +235,7 @@ const fetchDashboardData = async () => {
 
   const assessAllApplications = async (jobId: string, applications: any[]) => {
     try {
-      const unassessedApps = applications.filter(app => !app.ai_screening_score);
+      const unassessedApps = applications.filter(app => !app.screening_score);
       
       if (unassessedApps.length === 0) {
         toast({
@@ -602,13 +603,13 @@ const fetchDashboardData = async () => {
                                     </div>
                                     
                                      <div className="flex items-center space-x-3">
-                                       {application.ai_screening_score ? (
+                                       {application.screening_score ? (
                                          <TooltipProvider>
                                            <Tooltip>
                                              <TooltipTrigger asChild>
                                                <div className="flex items-center space-x-2 cursor-help">
-                                                 <Badge className={getScoreBadgeColor(application.ai_screening_score)}>
-                                                   {application.ai_screening_score}%
+                                                 <Badge className={getScoreBadgeColor(application.screening_score)}>
+                                                   {application.screening_score}%
                                                  </Badge>
                                                  <div className="w-16">
                                                    <Progress 
@@ -637,7 +638,7 @@ const fetchDashboardData = async () => {
                                          </Button>
                                        )}
                                       
-                                       {application.status !== 'selected' && application.ai_screening_score && application.ai_screening_score >= 70 && (
+                                       {application.status !== 'selected' && application.screening_score && application.screening_score >= 70 && (
                                          <Button 
                                            variant="outline" 
                                            size="sm"
