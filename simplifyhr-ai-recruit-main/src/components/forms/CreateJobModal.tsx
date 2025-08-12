@@ -2927,6 +2927,7 @@ ${companyName} is an equal opportunity employer committed to diversity and inclu
           total_positions: totalPositions,
           interview_rounds: interviewRounds.length,
           scoring_criteria: { global: scoringCriteria }, // Save global criteria
+          // min_assessment_score: minAssessmentScore,
           is_urgent: false,
         })
         .select("id") // We only need the ID of the new job

@@ -4,12 +4,26 @@ import { useToast } from '@/hooks/use-toast';
 import { DataType } from '../types';
 import { getSearchFields, applyStatusFilter } from '../utils';
 
-export const useDetailedViewData = (type: DataType, open: boolean, initialData?: any[]) => {
+export const useDetailedViewData = (
+  type: DataType, 
+  open: boolean, 
+  initialData?: any[],
+  defaultFilter?: string
+) => {
   const [data, setData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterValue, setFilterValue] = useState('all');
+
+  // Reset filter value when modal opens or defaultFilter changes
+  useEffect(() => {
+    if (open) {
+      // Always reset to the provided default when modal opens
+      setFilterValue(defaultFilter || 'all');
+      setSearchTerm(''); // Also reset search term for clean state
+    }
+  }, [open, defaultFilter]);
   const { toast } = useToast();
 
   const buildQuery = useCallback(() => {
@@ -62,7 +76,11 @@ export const useDetailedViewData = (type: DataType, open: boolean, initialData?:
         return supabase
           .from('job_applications')
           .select(`
-      *,
+      id,
+      status,
+      screening_score,
+      ai_screening_notes,
+      applied_at,
       jobs!inner(title, companies!inner(name)),
       candidates!inner(
         profiles!inner(

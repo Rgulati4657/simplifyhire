@@ -11,6 +11,7 @@ interface FilterControlsProps {
   type: DataType;
   onSearchChange: (value: string) => void;
   onFilterChange: (value: string) => void;
+  customFilterOptions?: FilterOption[];
 }
 
 export const FilterControls = ({
@@ -18,9 +19,13 @@ export const FilterControls = ({
   filterValue,
   type,
   onSearchChange,
-  onFilterChange
+  onFilterChange,
+  customFilterOptions
 }: FilterControlsProps) => {
-  const filterOptions = FILTER_OPTIONS[type] || [];
+  // Only use custom options if explicitly provided (not undefined or null)
+  const filterOptions = customFilterOptions !== null && customFilterOptions !== undefined 
+    ? customFilterOptions 
+    : FILTER_OPTIONS[type] || [];
 
   return (
     <div className="flex items-center space-x-4 py-4">

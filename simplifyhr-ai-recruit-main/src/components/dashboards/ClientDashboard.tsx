@@ -35,10 +35,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import { ViewJobModal } from '@/components/modals/ViewJobModal';
+
 const ClientDashboard = () => {
 
 const [applications, setApplications] = useState([]);
+ const [viewingJobId, setViewingJobId] = useState<string | null>(null);
 
+ console.log(`[ClientDashboard] Current viewingJobId is:`, viewingJobId);
   const { profile } = useAuth();
   const { toast } = useToast();
   const [stats, setStats] = useState({
@@ -56,10 +60,13 @@ const [applications, setApplications] = useState([]);
     type: 'users' | 'companies' | 'jobs' | 'applications' | 'activeJobs' | 'monthlyHires';
     open: boolean;
     title: string;
+    customFilterOptions?: { value: string; label: string }[];
+    customFilterOptions?: { value: string; label: string }[];
   }>({
     type: 'jobs',
     open: false,
-    title: ''
+    title: '',
+    customFilterOptions: undefined
   });
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -69,461 +76,6 @@ const [applications, setApplications] = useState([]);
       // fetchApplicationsDirectly();
     }
   }, [profile]);
-
-  // const fetchDashboardData = async () => {
-  //   try {
-  //     console.log('Fetching dashboard data for user:', profile?.id);
-      
-  //     // Get jobs created by this user with explicit error handling
-  //     const { data: jobsData, error } = await supabase
-  //       .from('jobs')
-  //       .select(`
-  //         *,
-  //         companies (name),
-  //         job_applications (
-  //           id,
-  //           status,
-  //           ai_screening_score,
-  //           ai_screening_notes,
-  //           candidates (first_name, last_name, email),
-  //           interviews (id, status, scheduled_at, type)
-  //         )
-  //       `)
-  //       .eq('created_by', profile?.id)
-  //       .order('created_at', { ascending: false });
-
-  //     console.log('Jobs query result:', { jobsData, error, userCreatedBy: profile?.id });
-
-  //     console.log('Jobs data fetched:', jobsData?.length, 'jobs');
-      
-  //     if (error) {
-  //       console.error('Error fetching jobs:', error);
-  //       throw error;
-  //     }
-
-  //     if (jobsData) {
-  //       const activeJobs = jobsData.filter(job => job.status === 'published').length;
-  //       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-  //       const shortlistedCandidates = jobsData.reduce((acc, job) => 
-  //         acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
-  //       );
-  //       const selectedCandidates = jobsData.reduce((acc, job) => 
-  //         acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
-  //       );
-
-  //       console.log('Dashboard stats calculated:', { activeJobs, totalApplications, shortlistedCandidates, selectedCandidates });
-
-  //       setStats({
-  //         activeJobs,
-  //         totalApplications,
-  //         shortlistedCandidates,
-  //         selectedCandidates,
-  //         scheduledInterviews: 0 // TODO: Count scheduled interviews
-  //       });
-
-  //       setRecentJobs(jobsData.slice(0, 10));
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching dashboard data:', error);
-  //     toast({
-  //       title: "Failed to load dashboard data",
-  //       description: "Could not fetch your jobs and statistics.",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // In ClientDashboard.tsx
-
-// const fetchDashboardData = async () => {
-//   if (!profile?.id) {
-//     setLoading(false);
-//     return;
-//   }
-//   setLoading(true);
-//   try {
-//     // This query will now use the new RLS policy and helper function.
-//     // We can simplify it by removing the manual company_id fetch.
-//     const { data: jobsData, error: jobsError } = await supabase
-//       .from('jobs')
-//       .select(`
-//         *,
-//         companies (name),
-//         job_applications (id, status, candidates(profiles(first_name, last_name, email)))
-//       `); // No more .eq('company_id', ...) needed here, RLS handles it automatically!
-
-//     if (jobsError) {
-//       console.error('Error fetching jobs:', jobsError);
-//       throw jobsError;
-//     }
-
-//     console.log('Jobs data fetched for company:', jobsData?.length, 'jobs');
-
-//     if (jobsData) {
-//       // ... (rest of the function is the same)
-//       const activeJobs = jobsData.filter(job => job.status === 'published').length;
-//       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-//       const shortlistedCandidates = jobsData.reduce((acc, job) =>
-//           acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
-//       );
-//       const selectedCandidates = jobsData.reduce((acc, job) =>
-//           acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
-//       );
-//       setStats({
-//           activeJobs,
-//           totalApplications,
-//           shortlistedCandidates,
-//           selectedCandidates,
-//           scheduledInterviews: 0
-//       });
-//       setRecentJobs(jobsData.slice(0, 10));
-//     }
-
-//   } catch (error: any) {
-//     console.error('Error fetching dashboard data:', error);
-//     toast({
-//       title: "Failed to load dashboard data",
-//       description: error.message || "Could not fetch your company's jobs and statistics.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-// In ClientDashboard.tsx
-// working but not applications
-// const fetchDashboardData = async () => {
-//   // We need the profile to be loaded so RLS can work.
-//   if (!profile?.id) {
-//     console.log("Profile not yet loaded. Aborting fetch.");
-//     setLoading(false);
-//     return;
-//   }
-
-//   setLoading(true);
-//   console.log(`--- STARTING DASHBOARD FETCH for admin: ${profile.id} ---`);
-//   try {
-//     console.log(`Fetching all company data for user: ${profile.id}`);
-
-//     // --- THIS IS THE CORRECTED, SIMPLIFIED QUERY ---
-//     // We just ask for the jobs. The RLS policy we created will automatically
-//     // and securely filter them to only the ones for the admin's company.
-//     const { data: jobsData, error: jobsError } = await supabase
-//       .from('jobs')
-//       .select(`
-//         *,
-//         companies (name),
-//         job_applications (
-//           id,
-//           status,
-//           candidates!inner(profiles!inner(first_name, last_name, email)),
-//           interview_schedules (id, status)
-//         )
-//       `)
-//       .order('created_at', { ascending: false });
-
-//     if (jobsError) {
-//       console.error("Error fetching jobs:", jobsError);
-//       throw jobsError;
-//     }
-
-//     console.log('Successfully fetched jobs for company:', jobsData);
-
-//     // The rest of your function to calculate stats will now work correctly,
-//     // even if 'jobsData' is an empty array [].
-//     // if (jobsData) {
-//     //   const activeJobs = jobsData.filter(job => job.status === 'published').length;
-//     //   const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-//     //   const shortlistedCandidates = jobsData.reduce((acc, job) =>
-//     //       acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
-//     //   );
-//     //   const selectedCandidates = jobsData.reduce((acc, job) =>
-//     //       acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
-//     //   );
-//     //   const scheduledInterviews = jobsData.reduce((acc, job) =>
-//     //       acc + (job.job_applications?.reduce((appAcc: any, app: any) => appAcc + (app.interview_schedules?.length || 0), 0) || 0), 0
-//     //   );
-
-//      if (jobsData) {
-//       const activeJobs = jobsData.filter(job => job.status === 'published').length;
-      
-//       const totalApplications = jobsData.reduce((acc, job) => 
-//         acc + (job.job_applications?.length || 0), 0);
-      
-//       const shortlistedCandidates = jobsData.reduce((acc, job) =>
-//         acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0);
-        
-//       const selectedCandidates = jobsData.reduce((acc, job) =>
-//         acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0);
-        
-//       const scheduledInterviews = jobsData.reduce((acc, job) =>
-//         acc + (job.job_applications?.reduce((appAcc: any, app: any) => appAcc + (app.interview_schedules?.length || 0), 0) || 0), 0);
-
-//       setStats({
-//           activeJobs,
-//           totalApplications,
-//           shortlistedCandidates,
-//           selectedCandidates,
-//           scheduledInterviews
-//       });
-
-//       setRecentJobs(jobsData.slice(0, 10));
-//     }
-
-//   } catch (error: any) {
-//     console.error('A critical error occurred in fetchDashboardData:', error);
-//     toast({
-//       title: "Failed to load dashboard data",
-//       description: error.message || "Could not fetch your company's jobs and statistics.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-// In ClientDashboard.tsx
-// under review 
-// const fetchDashboardData = async () => {
-//   if (!profile?.id) {
-//     setLoading(false);
-//     return;
-//   }
-//   setLoading(true);
-//   try {
-//     console.log(`--- STARTING DASHBOARD FETCH for user: ${profile.id} ---`);
-
-//     // --- STEP 1: THE QUERY ---
-//     const { data: jobsData, error: jobsError, status } = await supabase
-//       .from('jobs')
-//       .select(`
-//         *,
-//         companies (name),
-//         job_applications (
-//           id,
-//           status,
-//           candidates!inner(profiles!inner(first_name, last_name, email))
-//         )
-//       `);
-//       // NOTE: I am temporarily removing .order() to simplify the query for debugging.
-
-//     // --- STEP 2: DIAGNOSE THE RESPONSE ---
-//     console.log("Query Status Code:", status);
-//     if (jobsError) {
-//       console.error("!!! QUERY FAILED. Supabase Error:", jobsError);
-//       throw jobsError;
-//     }
-//     console.log("Query Succeeded. Raw data received:", jobsData);
-
-//     // --- STEP 3: INSPECT THE DATA ---
-//     if (jobsData && jobsData.length > 0) {
-//       console.log(`Found ${jobsData.length} job(s).`);
-//       // Let's inspect the first job to see if it has the applications array
-//       const firstJob = jobsData[0];
-//       console.log("Inspecting first job:", firstJob);
-      
-//       if (firstJob.job_applications) {
-//         console.log("✅ SUCCESS: The 'job_applications' array EXISTS on the job object.");
-//         console.log(`It contains ${firstJob.job_applications.length} application(s).`);
-//       } else {
-//         console.error("❌ FAILURE: The 'job_applications' array is MISSING from the job object.");
-//         console.error("This is likely an RLS or a query syntax issue.");
-//       }
-//     } else {
-//       console.log("No jobs found for this user's company.");
-//     }
-
-//     // --- STEP 4: CALCULATE STATS (This will only run if data is correct) ---
-//     if (jobsData) {
-//       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-//       console.log("Calculated Total Applications:", totalApplications);
-      
-//       // ... (rest of your setStats logic)
-//       setStats(prevStats => ({...prevStats, totalApplications}));
-//       setRecentJobs(jobsData);
-//     }
-
-//   } catch (error: any) {
-//     console.error('--- FETCH FAILED in catch block ---', error);
-//     toast({
-//       title: "Failed to load dashboard data",
-//       description: error.message,
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-// const fetchDashboardData = async () => {
-//   // Ensure profile is loaded so its data can be used by RLS.
-//   if (!profile?.id) {
-//     setLoading(false);
-//     return;
-//   }
-
-//   setLoading(true);
-//   try {
-//     // This single query fetches everything needed for the dashboard.
-//     // It is now guaranteed to work because the backend data and RLS policies are correct.
-//     const { data: jobsData, error: jobsError } = await supabase
-//       .from('jobs')
-//       .select(`
-//         *,
-//         companies (name),
-//         job_applications (
-//           id,
-//           status,
-//           candidates!inner(profiles!inner(first_name, last_name, email)),
-//           interview_schedules (id, status)
-//         )
-//       `)
-//       // Sort by the creation date of the jobs themselves.
-//       .order('created_at', { ascending: false });
-
-//     if (jobsError) {
-//       console.error("Error fetching dashboard data:", jobsError);
-//       throw jobsError;
-//     }
-
-//     // This logic will now receive jobs with populated `job_applications` arrays.
-//     if (jobsData) {
-//       const activeJobs = jobsData.filter(job => job.status === 'published').length;
-//       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-//       const shortlistedCandidates = jobsData.reduce((acc, job) =>
-//           acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
-//       );
-//       const selectedCandidates = jobsData.reduce((acc, job) =>
-//           acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
-//       );
-//       const scheduledInterviews = jobsData.reduce((acc, job) =>
-//           acc + (job.job_applications?.reduce((appAcc: any, app: any) => appAcc + (app.interview_schedules?.length || 0), 0) || 0), 0
-//       );
-
-//       setStats({
-//           activeJobs,
-//           totalApplications,
-//           shortlistedCandidates,
-//           selectedCandidates,
-//           scheduledInterviews
-//       });
-
-//       setRecentJobs(jobsData.slice(0, 10));
-//     }
-
-//   } catch (error: any) {
-//     console.error('Error in fetchDashboardData:', error);
-//     toast({
-//       title: "Failed to load dashboard data",
-//       description: error.message || "Could not fetch your company's jobs and statistics.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-// Place this in your AdminDashboard.tsx component or a related hook.
-
-// const fetchDashboardData = async () => {
-//   // Ensure the admin's profile is loaded so their JWT is active and has the correct claims.
-//   if (!profile?.id) {
-//     setLoading(false);
-//     return;
-//   }
-
-//   setLoading(true);
-//   try {
-//     // This query is now fully secured by our new RLS policy.
-//     // When an admin runs this, the database will automatically only return
-//     // applications where `company_id` matches the admin's company.
-//     const { data: jobsData, error: jobsError } = await supabase
-//       .from('jobs')
-//       .select(`
-//         *,
-//         job_applications ( id, status ) 
-//       `)
-//       .order('created_at', { ascending: false });
-
-//     if (jobsError) throw jobsError;
-
-//     // This logic will now work correctly as `job_applications` will be populated.
-//     if (jobsData) {
-//       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
-      
-//       console.log("SUCCESS: Fetched jobs. Total applications found:", totalApplications);
-
-//       setStats({
-//           totalApplications: totalApplications,
-//           ... calculate any other stats you need
-//       });
-//     }
-
-//   } catch (error: any) {
-//     console.error('Error fetching admin dashboard data:', error);
-//     toast({
-//       title: "Failed to load dashboard data",
-//       description: error.message,
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-
-// Find this function in your ClientDashboard.tsx and replace it entirely with this version.
-
-// const fetchApplicationsDirectly = async () => {
-//   if (!profile || profile.role !== 'admin') {
-//     setLoading(false);
-//     return;
-//   }
-//   setLoading(true);
-//   try {
-//     // THIS IS THE QUERY. It starts from `job_applications` as you said.
-//     // The RLS policy we just created makes this query secure.
-//     const { data, error } = await supabase
-//       .from('job_applications')
-//       .select(`
-//         *,
-//         jobs!inner(title, companies!inner(name)),
-//         candidates!inner(
-//           profiles!inner(
-//             first_name,
-//             last_name,
-//             email
-//           )
-//         )
-//       `)
-//       .order('applied_at', { ascending: false });
-
-//     if (error) throw error;
-
-//     console.log("SUCCESS: Directly fetched all application data:", data);
-    
-//     // Update state with the results
-//     setApplications(data || []);
-//     // You can still update your stats from this data
-//     setStats(prevStats => ({ ...prevStats, totalApplications: data?.length || 0 }));
-
-//   } catch (error: any) {
-//     console.error('Error fetching applications directly:', error);
-//     toast({
-//       title: "Failed to load application data",
-//       description: error.message,
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setLoading(false);
-//   }
-// };
 
 
 const fetchDashboardData = async () => {
@@ -543,11 +95,12 @@ const fetchDashboardData = async () => {
         companies (name),
         job_applications (
           *,
-          candidates!inner (
-            profiles!inner (
-              first_name,
-              last_name,
-              email
+          interview_schedules (*),
+            candidates!inner (
+              profiles!inner (
+                first_name,
+                last_name,
+                email
             )
           )
         )
@@ -560,16 +113,25 @@ const fetchDashboardData = async () => {
     // and each job has a `job_applications` array.
     // Each application within that array now has a `candidates.profiles` object.
     if (jobsData) {
+      console.log("SUCCESS: Fetched all job data:", jobsData);
       // Your existing statistics logic will now work perfectly.
       const activeJobs = jobsData.filter(job => job.status === 'published').length;
       const totalApplications = jobsData.reduce((acc, job) => acc + (job.job_applications?.length || 0), 0);
       const shortlistedCandidates = jobsData.reduce((acc, job) =>
-          acc + (job.job_applications?.filter((app: any) => app.status === 'screening').length || 0), 0
+          acc + (job.job_applications?.filter((app: any) => 
+            ['screening', 'interview'].includes(app.status)
+          ).length || 0), 0
       );
       const selectedCandidates = jobsData.reduce((acc, job) =>
           acc + (job.job_applications?.filter((app: any) => app.status === 'selected').length || 0), 0
       );
       // Note: `interview_schedules` is not in this query for simplicity.
+       const scheduledInterviews = jobsData.reduce((jobAcc, job) => {
+        const interviewCountForJob = job.job_applications.reduce((appAcc: any, app: any) => {
+          return appAcc + (app.interview_schedules?.length || 0);
+        }, 0);
+        return jobAcc + interviewCountForJob;
+      }, 0);
       // We can add it if needed, but this solves the current error.
 
       console.log("SUCCESS: Fetched all data. Total applications found:", totalApplications);
@@ -579,7 +141,7 @@ const fetchDashboardData = async () => {
           totalApplications,
           shortlistedCandidates,
           selectedCandidates,
-          scheduledInterviews: stats.scheduledInterviews // Keep old value for now
+          scheduledInterviews // Keep old value for now
       });
 
       // This also correctly populates your list of jobs.
@@ -614,7 +176,32 @@ const fetchDashboardData = async () => {
   };
 
   const openDetailModal = (type: 'users' | 'companies' | 'jobs' | 'applications' | 'activeJobs' | 'monthlyHires', title: string) => {
-    setDetailModal({ type, open: true, title });
+    if (title === 'Shortlisted Candidates') {
+      setDetailModal({
+        type,
+        open: true,
+        title,
+        customFilterOptions: [
+          { value: 'interview', label: 'Interview' },
+          { value: 'screening', label: 'Screening' }
+        ],
+        defaultFilter: 'interview'
+      });
+    } else if (title === 'Total Applications') {
+      setDetailModal({
+        type,
+        open: true,
+        title,
+        customFilterOptions: null,
+        defaultFilter: 'all'
+      });
+    } else {
+      setDetailModal({
+        type,
+        open: true,
+        title
+      });
+    }
   };
 
   const handleGlobalFilter = (value: string) => {
@@ -648,7 +235,7 @@ const fetchDashboardData = async () => {
 
   const assessAllApplications = async (jobId: string, applications: any[]) => {
     try {
-      const unassessedApps = applications.filter(app => !app.ai_screening_score);
+      const unassessedApps = applications.filter(app => !app.screening_score);
       
       if (unassessedApps.length === 0) {
         toast({
@@ -740,6 +327,7 @@ const fetchDashboardData = async () => {
     </div>
   );
 
+  // Return loading state if data is being fetched
   if (loading) {
     return (
       <DashboardLayout title="Client Dashboard">
@@ -761,6 +349,7 @@ const fetchDashboardData = async () => {
     );
   }
 
+  // Return main dashboard content
   return (
     <DashboardLayout title="Client Dashboard" actions={dashboardActions}>
       <div className="space-y-8 animate-fade-in">
@@ -949,7 +538,7 @@ const fetchDashboardData = async () => {
                               </Badge>
                               
                               <div className="flex items-center space-x-1">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => setViewingJobId(job.id)}>
                                   <Eye className="w-4 h-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm">
@@ -1014,13 +603,13 @@ const fetchDashboardData = async () => {
                                     </div>
                                     
                                      <div className="flex items-center space-x-3">
-                                       {application.ai_screening_score ? (
+                                       {application.screening_score ? (
                                          <TooltipProvider>
                                            <Tooltip>
                                              <TooltipTrigger asChild>
                                                <div className="flex items-center space-x-2 cursor-help">
-                                                 <Badge className={getScoreBadgeColor(application.ai_screening_score)}>
-                                                   {application.ai_screening_score}%
+                                                 <Badge className={getScoreBadgeColor(application.screening_score)}>
+                                                   {application.screening_score}%
                                                  </Badge>
                                                  <div className="w-16">
                                                    <Progress 
@@ -1049,7 +638,7 @@ const fetchDashboardData = async () => {
                                          </Button>
                                        )}
                                       
-                                       {application.status !== 'selected' && application.ai_screening_score && application.ai_screening_score >= 70 && (
+                                       {application.status !== 'selected' && application.screening_score && application.screening_score >= 70 && (
                                          <Button 
                                            variant="outline" 
                                            size="sm"
@@ -1122,7 +711,19 @@ const fetchDashboardData = async () => {
           open={detailModal.open}
           onOpenChange={(open) => setDetailModal({ ...detailModal, open })}
           title={detailModal.title}
+          customFilterOptions={detailModal.customFilterOptions}
+          defaultFilter={detailModal.defaultFilter}
+          // initialData={recentJobs}
+          onViewJob={(id) => {
+            console.log(`[ClientDashboard] onViewJob called with ID: ${id}. Setting state...`);
+            setViewingJobId(id);
+          }}
         />
+        <ViewJobModal
+        jobId={viewingJobId}
+        open={!!viewingJobId} // The modal is open if viewingJobId is not null
+        onOpenChange={() => setViewingJobId(null)} // Close the modal by resetting the ID
+      />
       </div>
     </DashboardLayout>
   );

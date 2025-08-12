@@ -20,12 +20,25 @@ export interface DetailedViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  initialData?: any[]; // <-- ADD/VERIFY THIS LINE
+  onViewJob?: (id: string) => void;
+  initialData?: any[];
+  customFilterOptions?: { value: string; label: string; }[];
+  defaultFilter?: string;
 }
 
-const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: DetailedViewModalProps) => {
+const DetailedViewModal = ({ 
+  type, 
+  open, 
+  onOpenChange, 
+  title,
+  initialData,
+  onViewJob,
+  customFilterOptions,
+  defaultFilter
+}: DetailedViewModalProps) => {
    // --- THIS IS THE TEST ---
-  console.log("DetailedViewModal is rendering with props:", { type, open });
+  // console.log("DetailedViewModal is rendering with props:", { type, open });
+  console.log(`[DetailedViewModal] Rendering. The onViewJob function is:`, onViewJob);
 
   const {
     data,
@@ -36,7 +49,7 @@ const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: Deta
     setSearchTerm,
     setFilterValue,
     refetchData
-  } = useDetailedViewData(type, open,initialData);
+  } = useDetailedViewData(type, open, initialData, defaultFilter);
 
   // Edit modal states
   const [editUser, setEditUser] = useState<EditModalState>({ open: false, id: null });
@@ -90,6 +103,7 @@ const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: Deta
             type={type}
             onSearchChange={setSearchTerm}
             onFilterChange={setFilterValue}
+            customFilterOptions={customFilterOptions}
           />
 
           <div className="border rounded-lg overflow-auto max-h-96">
@@ -98,6 +112,7 @@ const DetailedViewModal = ({ type, open, onOpenChange, title ,initialData}: Deta
                 type={type} 
                 data={filteredData} 
                 onEdit={handleEdit}
+                onView={onViewJob} // Pass the onViewJob prop to TableRenderer
               />
             </LoadingState>
           </div>

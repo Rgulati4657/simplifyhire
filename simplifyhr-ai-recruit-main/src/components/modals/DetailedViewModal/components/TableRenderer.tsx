@@ -12,9 +12,11 @@ interface TableRendererProps {
   type: DataType;
   data: any[];
   onEdit?: (id: string, entityType: string) => void;
+  onView?: (id: string) => void; // <-- Add this
 }
 
-export const TableRenderer = ({ type, data, onEdit }: TableRendererProps) => {
+export const TableRenderer = ({ type, data, onEdit , onView }: TableRendererProps) => {
+    console.log(`[TableRenderer] Rendering for type "${type}". The onView function is:`, onView);
   switch (type) {
     case 'users':
       return <UsersTable data={data} onEdit={onEdit} />;
@@ -27,7 +29,7 @@ export const TableRenderer = ({ type, data, onEdit }: TableRendererProps) => {
     
     case 'jobs':
     case 'activeJobs':
-      return <JobsTable data={data} onEdit={onEdit} />;
+      return <JobsTable data={data} onEdit={onEdit} onView={onView} />;
     
     case 'applications':
     case 'monthlyHires':

@@ -5,6 +5,8 @@ export interface DetailedViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  customFilterOptions?: FilterOption[];
+  defaultFilter?: string;
 }
 
 export interface EditModalState {

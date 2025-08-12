@@ -5,9 +5,11 @@ import { Eye, Edit } from 'lucide-react';
 import { TableBaseProps } from '../types';
 import { formatDate, getStatusColor } from '../utils';
 
-interface JobsTableProps extends TableBaseProps {}
+interface JobsTableProps extends TableBaseProps {
+   onView?: (id: string) => void; // <-- Add this
+}
 
-export const JobsTable = ({ data, onEdit }: JobsTableProps) => {
+export const JobsTable = ({ data, onEdit, onView }: JobsTableProps) => {
   return (
     <Table>
       <TableHeader>
@@ -36,7 +38,13 @@ export const JobsTable = ({ data, onEdit }: JobsTableProps) => {
             <TableCell>{formatDate(job.created_at)}</TableCell>
             <TableCell>
               <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm"  onClick={() => {
+    // --- CHECKPOINT 1 ---
+    console.log(`[JobsTable] Eye icon clicked for job ID: ${job.id}`);
+    if (onView) {
+      onView(job.id);
+    }
+  }}>
                   <Eye className="w-4 h-4" />
                 </Button>
                 <Button variant="ghost" size="sm">
