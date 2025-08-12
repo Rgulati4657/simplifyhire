@@ -24,10 +24,17 @@ interface OfferTemplate {
   id: string;
   template_name: string;
   template_content: string;
+  template_link?: string;
   created_at: string;
+  updated_at: string;
   is_validated: boolean;
+  is_default: boolean;
+  template_version: number;
   country: string;
   job_role: string;
+  validation_notes?: string;
+  company_id: string;
+  created_by: string;
 }
 
 interface OfferTemplateManagerProps {
@@ -67,7 +74,7 @@ const OfferTemplateManager = ({ trigger, onTemplateUploaded }: OfferTemplateMana
     if (open) {
       fetchTemplates();
     }
-  }, [open, profile?.user_id]);
+  }, [open, profile?.id]);
 
   // Filter templates when templates or roleFilter changes
   useEffect(() => {
@@ -79,16 +86,16 @@ const OfferTemplateManager = ({ trigger, onTemplateUploaded }: OfferTemplateMana
   }, [templates, roleFilter]);
 
   const fetchTemplates = async () => {
-    if (!profile?.user_id) return;
+    if (!profile?.id) return;
     
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('offer_templates')
         .select('*')
-        .eq('created_by', profile.user_id)
+        .eq('created_by', profile.id)
         .order('created_at', { ascending: false });
-
+      
       if (error) throw error;
       setTemplates(data || []);
     } catch (error) {
@@ -101,9 +108,7 @@ const OfferTemplateManager = ({ trigger, onTemplateUploaded }: OfferTemplateMana
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  };  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
@@ -124,35 +129,50 @@ const OfferTemplateManager = ({ trigger, onTemplateUploaded }: OfferTemplateMana
   };
 
   const uploadTemplate = async () => {
-    if (!selectedFile || !profile?.user_id) return;
+    if (!selectedFile || !profile?.id) return;
 
     try {
       setUploading(true);
       
       // Upload file to storage
-      const fileName = `${profile.user_id}/${Date.now()}-${selectedFile.name}`;
+      const fileName = `${profile.id}/${Date.now()}-${selectedFile.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('offer-templates')
         .upload(fileName, selectedFile);
 
       if (uploadError) throw uploadError;
 
-      // Create template record
+      // Get current user's company_id - this would need to be fetched from user context
+      // For now, using a placeholder - you'll need to implement proper company resolution
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_name')
+        .eq('id', profile.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Create template record with new schema
       const { data: template, error: templateError } = await supabase
         .from('offer_templates')
         .insert({
           template_name: selectedFile.name,
           template_content: uploadData.path,
-          created_by: profile.user_id,
+          template_link: uploadData.path, // Store file path as link
+          created_by: profile.id,
+          company_id: profile.id, // You'll need to implement proper company_id resolution
           country: 'Indonesia', // Default country, can be made configurable
-          job_role: selectedRole
+          job_role: selectedRole,
+          is_validated: false,
+          is_default: false,
+          template_version: 1
         })
         .select()
         .single();
 
       if (templateError) throw templateError;
 
-      setTemplates(prev => [template, ...prev]);
+      setTemplates(prev => [template as OfferTemplate, ...prev]);
       setSelectedFile(null);
       
       toast({

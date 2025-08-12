@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/supabase
+/supabase/functions/node_modules
+/supabase/functions/dist

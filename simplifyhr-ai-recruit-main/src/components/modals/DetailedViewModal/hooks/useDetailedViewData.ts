@@ -55,7 +55,7 @@ export const useDetailedViewData = (type: DataType, open: boolean, initialData?:
             profiles!jobs_created_by_fkey (first_name, last_name),
             job_applications (id, status)
           `)
-          .eq('status', 'published')
+          // .eq('status', 'published')
           .order('created_at', { ascending: false });
           
       case 'applications':
