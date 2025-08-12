@@ -334,7 +334,7 @@ const CreateJobModal = ({ onJobCreated, trigger }: CreateJobModalProps) => {
         "http://jd-gen.sslip.io/generate-job-description-streaming";
       const payload = {
         jobTitle: jobTitle,
-        companyName: companyName || companyName || profile?.company_name || null,
+        companyName: companyName || profile?.company_name || null,
         industry: "Technology",
         experienceLevel: experienceLevel || null,
         employmentType: employmentType || null,
@@ -1003,6 +1003,8 @@ ${companyName} is an equal opportunity employer committed to diversity and inclu
           interview_rounds: interviewRounds.length,
           scoring_criteria: { global: scoringCriteria }, // Save global criteria
           min_assessment_score: minAssessmentScore,
+          min_assessment_score: minAssessmentScore,
+
           is_urgent: false,
         })
         .select("id") // We only need the ID of the new job
@@ -1164,6 +1166,7 @@ ${companyName} is an equal opportunity employer committed to diversity and inclu
                         onChange={(e) => setCompanyName(e.target.value)}
                         placeholder="Enter your company name"
                         className="bg-background"
+                        disabled 
                       />
                       {!companyName && (
                         <p className="text-xs text-destructive">
